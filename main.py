@@ -1,4 +1,5 @@
 from scipy.io import loadmat
+from scipy.optimize import minimize
 import numpy as np
 import randomInitialize
 
@@ -32,3 +33,14 @@ num_of_labels = 10            # final layer size = number of prediction classes
 initial_weights_1 = randomInitialize.randomInitialize(hidden_layer1_size, input_layer_size)
 initial_weights_2 = randomInitialize.randomInitialize(hidden_layer2_size, hidden_layer1_size)
 initial_weights_3 = randomInitialize.randomInitialize(num_of_labels, hidden_layer2_size)
+
+# flattening the parameters into single vector
+initial_nn_parameters = np.concatenate((
+    initial_weights_1.flatten(),
+    initial_weights_2.flatten(),
+    initial_weights_3.flatten()
+))
+
+max_ier = 100
+lambda_reg = 0.1
+my_args = ()
