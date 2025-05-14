@@ -2,6 +2,7 @@ from scipy.io import loadmat
 from scipy.optimize import minimize
 import numpy as np
 import randomInitialize
+import neuralNetwork
 
 # loading the training data
 # mnist dataset is the handwritten digits data set containing pixel data of images:
@@ -41,6 +42,14 @@ initial_nn_parameters = np.concatenate((
     initial_weights_3.flatten()
 ))
 
-max_ier = 100
+max_iter = 100
 lambda_reg = 0.1
-my_args = ()
+my_args = (X_train, y_train, input_layer_size, hidden_layer1_size, hidden_layer2_size, num_of_labels, lambda_reg)
+
+# Calling minimize function to optimize the cost function
+final_results = minimize(neuralNetwork.neuralNetwork, x0=initial_nn_parameters,  # function output which we need to optimize
+                         args=my_args,                                           # arguments passed for the function, other than initial parameters.
+                         options={'maxiter': max_iter},                          # setting stopping criteria as iterations <= 100
+                         method='L-BFGS-B',                                      # Limited memory optimization method used mainly for large-scale computations
+                         jac=True)                                               # setting jacobian method of computing gradient vector.
+

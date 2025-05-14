@@ -21,7 +21,7 @@ Outputs the following results:
 '''
 
 
-def neuralNetwork(X_train, y_train, initial_nn_parameters, input_layer_size, hidden_layer1_size, hidden_layer2_size, num_of_labels, lambda_reg):
+def neuralNetwork(initial_nn_parameters, X_train, y_train, input_layer_size, hidden_layer1_size, hidden_layer2_size, num_of_labels, lambda_reg):
     # initial_nn_parameters are split back into weights matrices
     lim1 = hidden_layer1_size * (input_layer_size + 1)
     lim2 = hidden_layer2_size * (hidden_layer1_size + 1)
@@ -70,5 +70,26 @@ def neuralNetwork(X_train, y_train, initial_nn_parameters, input_layer_size, hid
     # Total cost = Cross entropy loss + L2 Regularization loss
     cost = lossFunctions.crossEntropyLoss(m, y_one_hot_enc, a4) + lossFunctions.L2RegLoss(lambda_reg, m, weights_1, weights_2, weights_3)
 
+
+    # Back propagation
+    # Step 1: Compute errors at each layer in backward direction
+
+    delta_4 = a4 - y_one_hot_enc                              # error at output layer
+    delta_3 = np.dot(delta_4, weights_3) * a3 * (1 - a3)      # error at hidden layer 2
+    delta_3 = delta_3[:, 1:]                                  # removing the bias term
+    delta_2 = np.dot(delta_3, weights_2) * a2 * (1 - a2)      # error at hidden layer 1
+    delta_2 = delta_2[:, 1:]                                  # removing the bias term
+
+    # Step 2: Calculate the gradient for each of the layers
+    weights_1[:, 0] = 0
+    weights_1_gradient = (1 / m) * np.dot(delta_2.transpose(), a1) + (lambda_reg / m) * weights_1
+
+    weights_2[:, 0] = 0
+    weights_2_gradient = (1 / m) * np.dot(delta_3.transpose(), a2) + (lambda_reg / m) * weights_2
+
+    weights_3[:, 0] = 0
+    weights_3_gradient = (1 / m) * np.dot(delta_4.transpose(), a3) + (lambda_reg / m) * weights_3
+
+    gradient = np.concatenate((weights_1_gradient.flatten(), weights_2_gradient.flatten(), weights_3_gradient.flatten()))
     
-    pass
+    return cost, gradient
