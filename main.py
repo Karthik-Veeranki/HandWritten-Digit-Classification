@@ -2,7 +2,8 @@ from scipy.io import loadmat
 from scipy.optimize import minimize
 import numpy as np
 import randomInitialize
-import neuralNetwork
+import optimize
+import prediction
 
 # loading the training data
 # mnist dataset is the handwritten digits data set containing pixel data of images:
@@ -46,10 +47,41 @@ max_iter = 100
 lambda_reg = 0.1
 my_args = (X_train, y_train, input_layer_size, hidden_layer1_size, hidden_layer2_size, num_of_labels, lambda_reg)
 
-# Calling minimize function to optimize the cost function
-final_results = minimize(neuralNetwork.neuralNetwork, x0=initial_nn_parameters,  # function output which we need to optimize
-                         args=my_args,                                           # arguments passed for the function, other than initial parameters.
-                         options={'maxiter': max_iter},                          # setting stopping criteria as iterations <= 100
-                         method='L-BFGS-B',                                      # Limited memory optimization method used mainly for large-scale computations
-                         jac=True)                                               # setting jacobian method of computing gradient vector.
+solution = optimize.calculateMinimum(initial_nn_parameters, my_args, max_iter)
 
+
+lim1 = hidden_layer1_size * (input_layer_size + 1)
+lim2 = hidden_layer2_size * (hidden_layer1_size + 1)
+
+weights_1 = np.reshape(initial_nn_parameters[0:lim1],
+                        (hidden_layer1_size, input_layer_size + 1))
+weights_2 = np.reshape(initial_nn_parameters[lim1 : (lim1 + lim2)],
+                        (hidden_layer2_size, hidden_layer1_size + 1))
+weights_3 = np.reshape(initial_nn_parameters[(lim1 + lim2):],
+                        (num_of_labels, hidden_layer2_size + 1))
+
+
+# Model prediction
+pred = prediction.predict(weights_1, weights_2, weights_3, X_test)
+
+# Testing data accuracy
+accuracy_train = (np.mean(pred == y_test) * 100)
+print("Testing data accuracy = {}".format(accuracy_train))
+
+
+# precision of the model
+true_positive = 0
+for i in range(len(pred)):
+    if pred[i] == y_train[i]:
+        true_positive += 1
+
+false_positive = len(pred) - true_positive
+
+print("Precision = {}".format(true_positive / (true_positive + false_positive)))
+
+'''
+# Save the weights matrices as .txt files, so as to be used for future.
+np.savetxt("weights1.txt", weights_1, delimiter=' ')
+np.savetxt("weights2.txt", weights_2, delimiter=' ')
+np.savetxt("weights3.txt", weights_3, delimiter=' ')
+'''
