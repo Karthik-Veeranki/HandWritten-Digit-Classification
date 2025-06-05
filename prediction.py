@@ -19,5 +19,6 @@ def predict(weights_1, weights_2, weights_3, X_test):
     z4 = np.dot(a3, weights_3.transpose())
     a4 = 1 / (1 + np.exp(-z4))
 
+    # one hot encoding
     pred = (np.argmax(a4, axis=1))
     return pred

@@ -23,7 +23,7 @@ y = y.flatten()
 
 # split the data into 60,000 training samples and 10,000 testing samples
 X_train, y_train = X[:60000, :], y[:60000]       # index 0 - 59,999
-X_test, y_test = X[60000:, :], y[60000:]         # index 60,000 - 79,999
+X_test, y_test = X[60000:, :], y[60000:]         # index 60,000 - 69,999
 
 input_layer_size = 784        # 28x28 pixel data, hence 784 features
 hidden_layer1_size = 100      # first fully connected layer size = 100
@@ -53,11 +53,11 @@ solution = optimize.calculateMinimum(initial_nn_parameters, my_args, max_iter)
 lim1 = hidden_layer1_size * (input_layer_size + 1)
 lim2 = hidden_layer2_size * (hidden_layer1_size + 1)
 
-weights_1 = np.reshape(initial_nn_parameters[0:lim1],
+weights_1 = np.reshape(solution[0:lim1],
                         (hidden_layer1_size, input_layer_size + 1))
-weights_2 = np.reshape(initial_nn_parameters[lim1 : (lim1 + lim2)],
+weights_2 = np.reshape(solution[lim1 : (lim1 + lim2)],
                         (hidden_layer2_size, hidden_layer1_size + 1))
-weights_3 = np.reshape(initial_nn_parameters[(lim1 + lim2):],
+weights_3 = np.reshape(solution[(lim1 + lim2):],
                         (num_of_labels, hidden_layer2_size + 1))
 
 
@@ -67,17 +67,6 @@ pred = prediction.predict(weights_1, weights_2, weights_3, X_test)
 # Testing data accuracy
 accuracy_train = (np.mean(pred == y_test) * 100)
 print("Testing data accuracy = {}".format(accuracy_train))
-
-
-# precision of the model
-true_positive = 0
-for i in range(len(pred)):
-    if pred[i] == y_train[i]:
-        true_positive += 1
-
-false_positive = len(pred) - true_positive
-
-print("Precision = {}".format(true_positive / (true_positive + false_positive)))
 
 '''
 # Save the weights matrices as .txt files, so as to be used for future.
